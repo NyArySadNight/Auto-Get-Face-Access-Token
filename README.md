@@ -1,5 +1,5 @@
 # Auto-Get-Face-Access-Token
-requests: A library used to make HTTP requests to connect and call the Facebook Graph API.  tkinter: A library used to build the graphical user interface (GUI) for the application.  Built-in standard Python libraries: http.server, json, os, random, threading, time, datetime, urllib.parse, and webbrowser
+Requests: A library used to make HTTP requests to connect and call the Facebook Graph API.  tkinter: A library used to build the graphical user interface (GUI) for the application.  Built-in standard Python libraries: http.server, json, os, random, threading, time, datetime, urllib.parse, and webbrowser
 * Required libraries and installation:
 * You need to install the requests library using the command pip install requests and ensure your Python environment has tkinter available.
 * Preparation steps:
