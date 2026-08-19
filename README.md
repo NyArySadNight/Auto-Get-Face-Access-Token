@@ -1,79 +1,82 @@
 # Auto-Get-Face-Access-Token
 
-Công cụ desktop (tkinter) lấy **Page Access Token dài hạn** của Facebook
-Fanpage qua đúng luồng OAuth chính thức (Facebook Login for Business) —
-không đăng nhập giả lập, không đụng tới mật khẩu Facebook của bạn.
+A desktop tool (tkinter) that obtains a **long-lived Page Access Token** for
+a Facebook Fanpage through the official OAuth flow (Facebook Login for
+Business) — no fake browser login, and it never touches your Facebook
+password.
 
-Đây là **công cụ chuẩn bị** cho [Auto-Face-API](../Auto-Face-API) (bộ đăng
-bài tự động) — chạy công cụ này trước để lấy Page ID + Access Token, ghi
-thẳng vào file cấu hình dùng chung `fb_autopost_config.json`.
+This is the **companion setup tool** for [Auto-Face-API](../Auto-Face-API)
+(the auto-poster) — run this first to get your Page ID + Access Token,
+written directly into the shared config file `fb_autopost_config.json`.
 
-## Cách hoạt động
+## How it works
 
-1. Bạn tự đăng nhập & bấm "Cho phép" trên chính trang facebook.com (mở qua
-   trình duyệt mặc định của máy).
-2. Facebook redirect về `http://localhost:8765/` kèm mã tạm (`code`) — script
-   dựng 1 local server tạm để bắt mã này.
-3. Script đổi mã đó lấy **short-lived user token** → đổi tiếp thành
-   **long-lived user token** (~60 ngày) → dùng token đó lấy
-   **Page Access Token** (thường không tự hết hạn) cho từng Page bạn quản
-   trị.
-4. Bạn chọn Page cần dùng, script tự ghi `page_id` + `access_token` vào
-   `fb_autopost_config.json`.
+1. You log in and click "Allow" yourself, on the real facebook.com (opened
+   in your machine's default browser).
+2. Facebook redirects to `http://localhost:8765/` with a temporary code —
+   the script spins up a temporary local server just to catch this code.
+3. The script exchanges that code for a **short-lived user token** → then
+   exchanges that for a **long-lived user token** (~60 days) → uses that to
+   fetch a **Page Access Token** (usually doesn't expire) for each Page you
+   manage.
+4. You pick the Page you want to use, and the script writes `page_id` +
+   `access_token` into `fb_autopost_config.json`.
 
-## Chuẩn bị trước (làm 1 lần trên developers.facebook.com)
+## Setup (one-time, on developers.facebook.com)
 
-1. Tạo 1 Facebook App → lấy **App ID** + **App Secret**.
-2. Thêm sản phẩm **Facebook Login** cho App đó.
-3. Vào **Facebook Login → Settings → Valid OAuth Redirect URIs**, thêm:
+1. Create a Facebook App → get its **App ID** + **App Secret**.
+2. Add the **Facebook Login** product to that App.
+3. Go to **Facebook Login → Settings → Valid OAuth Redirect URIs**, and add:
    ```
    http://localhost:8765/
    ```
-4. Bạn phải là **Admin** của Fanpage muốn đăng bài.
-5. App cần các quyền (scope): `pages_show_list`, `pages_read_engagement`,
-   `pages_manage_posts` — nếu App đang ở chế độ Development, tài khoản dùng
-   để test phải được thêm vào danh sách Tester/Admin của App.
+4. You must be an **Admin** of the Fanpage you want to post to.
+5. The App needs these scopes: `pages_show_list`, `pages_read_engagement`,
+   `pages_manage_posts` — if the App is still in Development mode, the test
+   account must be added to the App's Tester/Admin list.
 
-## Yêu cầu
+## Requirements
 
-- Python 3.9+ (tkinter thường có sẵn cùng Python)
-- Thư viện:
+- Python 3.9+ (tkinter usually ships with Python)
+- Dependency:
 
 ```bash
 pip install requests
 ```
 
-## Chạy chương trình
+## Running
 
 ```bash
 python3 AutoTokenAPI.py
 ```
 
-Các bước trong app:
+Steps inside the app:
 
-1. Nhập **App ID** và **App Secret**, bấm **① Đăng nhập Facebook & lấy
-   quyền** — trình duyệt sẽ mở ra để bạn đăng nhập/cấp quyền.
-2. Sau khi cấp quyền xong (tự động quay lại app), chọn Page cần dùng ở danh
-   sách **② Chọn Page**.
-3. Bấm **③ Lưu Page đã chọn** — `page_id` và `access_token` được ghi vào
-   `fb_autopost_config.json`, sẵn sàng để `AutoFixFace.py` (repo
-   Auto-Face-API) dùng ngay, không cần nhập tay.
+1. Enter your **App ID** and **App Secret**, click **① Log in to Facebook &
+   grant access** — your browser opens for login/consent.
+2. Once permission is granted (the app picks it up automatically), pick the
+   Page you want under **② Select Page**.
+3. Click **③ Save selected Page** — `page_id` and `access_token` get written
+   to `fb_autopost_config.json`, ready for `AutoFixFace.py` (in the
+   Auto-Face-API repo) to use right away, no manual entry needed.
 
-## Bảo mật
+## Security
 
-- **App Secret** và **Access Token** được lưu ở dạng plain text trong
-  `fb_autopost_config.json` cùng thư mục chạy script — **không commit file
-  này lên Git**, không chia sẻ cho người khác. Nên thêm vào `.gitignore`:
+- **App Secret** and **Access Token** are stored as plain text in
+  `fb_autopost_config.json`, in the script's directory — **never commit this
+  file to Git**, and don't share it. Add it to `.gitignore`:
   ```
   fb_autopost_config.json
   ```
-- Long-lived Page Token lấy từ long-lived user token thường **không tự hết
-  hạn**, nhưng sẽ bị vô hiệu nếu bạn đổi mật khẩu Facebook, thu hồi quyền
-  App, hoặc Facebook phát hiện hoạt động bất thường.
-- Nếu Page Token vô tình bị lộ, vào **Facebook → Cài đặt → Bảo mật → Ứng
-  dụng và trang web** để thu hồi quyền truy cập của App ngay lập tức.
+- A long-lived Page Token derived from a long-lived user token usually
+  **doesn't expire on its own**, but will be invalidated if you change your
+  Facebook password, revoke the App's permission, or Facebook flags
+  suspicious activity.
+- If a Page Token ever leaks, revoke App access immediately at **Facebook →
+  Settings → Security → Apps and Websites**.
 
-## Lưu ý
+## Notes
 
-- README bản gốc ghi lệnh chạy là `python3 fb_get_token.py` — tên file thật
-  trong repo là **`AutoTokenAPI.py`**, README này đã sửa lại đúng lệnh chạy.
+- The original README listed the run command as `python3 fb_get_token.py`
+  — the actual filename in this repo is **`AutoTokenAPI.py`**; this README
+  corrects that.
